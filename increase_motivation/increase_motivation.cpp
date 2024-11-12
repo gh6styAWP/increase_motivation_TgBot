@@ -18,6 +18,15 @@ vector<string> loadQuotesFromFile(const string& filePath) {
     }
     return quotes;
 }
+//функция вытягивания токена из файла
+string getToken(const string& filePath) {
+    ifstream file(filePath);
+    string token;
+
+    if (file.is_open())
+        getline(file, token);
+    return token;
+}
 
 int main()
 {
