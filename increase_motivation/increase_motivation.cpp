@@ -18,7 +18,16 @@ string getToken(const string& filePath) {
         getline(file, token);
     return token;
 }
+//функция вытягивания цитаты
+vector<string>loadQuotes(const string& filePath) {
+    ifstream file(filePath);
+    vector<string> quotes;
+    string line;
 
+    while (getline(file, line))
+        quotes.push_back(line);
+    return quotes;
+}
 
 int main() {
     setlocale(LC_ALL, "Ru");
