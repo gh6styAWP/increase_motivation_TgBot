@@ -20,7 +20,7 @@ string getToken(const string& filePath) {
     return token;
 }
 //вытягивание цитаты из файла
-vector<string>loadQuotes(const string& filePath) {
+vector<string>getQuotes(const string& filePath) {
     ifstream file(filePath);
     vector<string> quotes;
     string line;
@@ -86,8 +86,37 @@ void sendQuotes(Bot& bot, sqlite3* db, const vector<string>& quotes) {
         this_thread::sleep_for(chrono::minutes(1));
     }
 }
+
 int main() {
     setlocale(LC_ALL, "Ru");
-
     
+    try {
+        string token = getToken("C://Users//gafar//Desktop//tokenChris.txt");
+        vector<string> quotes = getQuotes("C://Users//gafar//Desktop//citata.txt");
+
+        Bot bot(token);
+
+        sqlite3* db;
+        setupDB(db);
+
+        bot.getEvents().onCommand("start", [&bot, db](Message::Ptr message) {
+            addUser(db, message->chat->id);
+            bot.getApi().sendMessage(message->chat->id, "You have been subscribed to motivational quotes!");
+            });
+
+        thread senderThread(sendQuotes, ref(bot), db, quotes);
+
+        TgLongPoll longPoll(bot);
+        while (true) 
+            longPoll.start();
+        
+        senderThread.join();
+        sqlite3_close(db);
+    }
+
+    catch (exception& e) {
+        cerr << "error: " << e.what() << endl;
+    }
+
+    return 0;
 }
