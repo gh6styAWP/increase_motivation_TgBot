@@ -40,9 +40,19 @@ void registerUser(sqlite3* db, int64_t chatId) {
     string insertQuery = "INSERT OR IGNORE INTO Users (chat_id) VALUES (" + to_string(chatId) + ");";
     sqlite3_exec(db, insertQuery.c_str(), nullptr, nullptr, nullptr);
 }
-//функция отправки случайной цитаты
-void sendRandomQuote(const Bot& bot, int64_t chatId, const vector<string>& quote)
+//функция получения всех chat_id из БД
+vector<int64_t> getAllUsersChatIds(sqlite3* db) {
+    vector<int64_t> chatIds;
+    const char* selectQuery = "SELECT chat_id FROM Users;";
+    sqlite3_stmt* stmt;
+    sqlite3_prepare_v2(db, selectQuery, -1, &stmt, nullptr);
 
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+        chatIds.push_back(sqlite3_column_int64(stmt, 0));
+
+    sqlite3_finalize(stmt);
+    return chatIds;
+}
 
 int main()
 {
