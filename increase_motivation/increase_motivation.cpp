@@ -61,7 +61,31 @@ vector<int64_t>getUser(sqlite3* db) {
     sqlite3_finalize(stmt);
     return chatIds;
 }
+//отправка цитаты
+void sendQuotes(Bot& bot, sqlite3* db, const vector<string>& quotes) {
+    size_t quoteIndex = 0;
+    while (true) {
+        
+        auto now = chrono::system_clock::now();
+        time_t time = chrono::system_clock::to_time_t(now);
+        tm* parts = localtime(&time);
 
+        if (parts->tm_hour == 10 || parts->tm_hour == 15 || parts->tm_hour == 20) {
+            auto users = getUser(db);
+
+            if (!users.empty()) {
+                string quote = quotes[quoteIndex];
+
+                for (int64_t chatId : users) 
+                    bot.getApi().sendMessage(chatId, quote);
+                
+                quoteIndex = (quoteIndex + 1) % quotes.size();
+            }
+            this_thread::sleep_for(chrono::hours(1));
+        }
+        this_thread::sleep_for(chrono::minutes(1));
+    }
+}
 int main() {
     setlocale(LC_ALL, "Ru");
 
