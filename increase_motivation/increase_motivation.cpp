@@ -7,6 +7,7 @@
 #include <sqlite3.h>
 using namespace std;
 using namespace TgBot;
+using namespace chrono;
 
 //функция вытягивания цитат из текстового файла
 vector<string> loadQuotesFromFile(const string& filePath) {
@@ -41,7 +42,7 @@ void registerUser(sqlite3* db, int64_t chatId) {
     sqlite3_exec(db, insertQuery.c_str(), nullptr, nullptr, nullptr);
 }
 //функция получения всех chat_id из БД
-vector<int64_t> getAllUsersChatIds(sqlite3* db) {
+vector<int64_t> getAllUserChatIds(sqlite3* db) {
     vector<int64_t> chatIds;
     const char* selectQuery = "SELECT chat_id FROM Users;";
     sqlite3_stmt* stmt;
@@ -53,7 +54,31 @@ vector<int64_t> getAllUsersChatIds(sqlite3* db) {
     sqlite3_finalize(stmt);
     return chatIds;
 }
+//функция отправки случайной цитаты
+void sendQuote(const Bot& bot, int64_t chatId, const vector<string>& quotes) {
+    int index = rand() % quotes.size();
+    bot.getApi().sendMessage(chatId, quotes[index]);
+}
+//функция отправки цитат по расписанию
+void startScheduledQuotes(Bot& bot, sqlite3* db, const vector<string>& quotes) {
+    vector<pair<int, int>> schedule = { {10, 0}, {14, 0}, {19, 0} };
 
+    while (true) {
+        auto now = system_clock::now();
+        auto nowTime = system_clock::to_time_t(now);
+        tm* localTime = localtime(&nowTime);
+
+        for (const auto& time : schedule) {
+            if (localTime->tm_hour == time.first && localTime->tm_min == time.second) {
+                vector<int64_t> chatIds = getAllUserChatIds(db);
+                for (int64_t chatId : chatIds) 
+                    sendQuote(bot, chatId, quotes);
+                this_thread::sleep_for(minutes(1));
+            }
+        }
+        this_thread::sleep_for(seconds(30));
+    }
+}
 int main()
 {
     setlocale(LC_ALL, "Ru");
