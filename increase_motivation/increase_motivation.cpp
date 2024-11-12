@@ -16,6 +16,7 @@ string getToken(const string& filePath) {
 
     if (file)
         getline(file, token);
+
     return token;
 }
 //функция вытягивания цитаты
@@ -26,6 +27,7 @@ vector<string>loadQuotes(const string& filePath) {
 
     while (getline(file, line))
         quotes.push_back(line);
+
     return quotes;
 }
 //инициализация БД
@@ -34,10 +36,17 @@ void setupDB(sqlite3*& db) {
         throw runtime_error("Failed to open database");
 
     const char* createTableSQL = "CREATE TABLE IF NOT EXISTS Users (ChatId INTEGER PRIMARY KEY);";
+
     if (sqlite3_exec(db, createTableSQL, 0, 0, nullptr) != SQLITE_OK)
         throw runtime_error("Failed to create table");
 }
+//добавление пользователей в БД
+void addUser(sqlite3* db, int64_t chatId) {
+    string sql = "INSERT OR IGNORE INTO Users (ChatId) VALUES (" + to_string(chatId) + ");";
 
+    if (sqlite3_exec(db, sql.c_str(), 0, 0, nullptr) != SQLITE_OK)
+        throw runtime_error("Failed to add user");
+}
 int main() {
     setlocale(LC_ALL, "Ru");
 
