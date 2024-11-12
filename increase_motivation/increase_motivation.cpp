@@ -35,6 +35,11 @@ void initDatabase(sqlite3*& db) {
     const char* createTableQuery = "CREATE TABLE IF NOT EXISTS Users (chat_id INTEGER PRIMARY KEY);";
     sqlite3_exec(db, createTableQuery, nullptr, nullptr, nullptr);
 }
+//функция добавления chat_id пользователя в БД.
+void registerUser(sqlite3* db, int64_t chatId) {
+    string insertQuery = "INSERT OR IGNORE INTO Users (chat_id) VALUES (" + to_string(chatId) + ");";
+    sqlite3_exec(db, insertQuery.c_str(), nullptr, nullptr, nullptr);
+}
 //функция отправки случайной цитаты
 void sendRandomQuote(const Bot& bot, int64_t chatId, const vector<string>& quote)
 
