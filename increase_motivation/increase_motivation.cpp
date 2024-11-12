@@ -28,6 +28,15 @@ vector<string>loadQuotes(const string& filePath) {
         quotes.push_back(line);
     return quotes;
 }
+//инициализация БД
+void setupDB(sqlite3*& db) {
+    if (sqlite3_open("bot_users.db", &db) != SQLITE_OK)
+        throw runtime_error("Failed to open database");
+
+    const char* createTableSQL = "CREATE TABLE IF NOT EXISTS Users (ChatId INTEGER PRIMARY KEY);";
+    if (sqlite3_exec(db, createTableSQL, 0, 0, nullptr) != SQLITE_OK)
+        throw runtime_error("Failed to create table");
+}
 
 int main() {
     setlocale(LC_ALL, "Ru");
