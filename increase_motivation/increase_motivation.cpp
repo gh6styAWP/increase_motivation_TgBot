@@ -4,7 +4,9 @@
 #include <fstream>
 #include <vector>
 #include <cstdlib>
+#include <sqlite3.h>
 using namespace std;
+using namespace TgBot;
 
 //функция вытягивания цитат из текстового файла
 vector<string> loadQuotesFromFile(const string& filePath) {
@@ -27,6 +29,15 @@ string getToken(const string& filePath) {
         getline(file, token);
     return token;
 }
+//функция инициализации БД и создания таблицы, если её нет.
+void initDatabase(sqlite3*& db) {
+    sqlite3_open("users.db", &db);
+    const char* createTableQuery = "CREATE TABLE IF NOT EXISTS Users (chat_id INTEGER PRIMARY KEY);";
+    sqlite3_exec(db, createTableQuery, nullptr, nullptr, nullptr);
+}
+//функция отправки случайной цитаты
+void sendRandomQuote(const Bot& bot, int64_t chatId, const vector<string>& quote)
+
 
 int main()
 {
